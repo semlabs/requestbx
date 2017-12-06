@@ -19,7 +19,8 @@ RUN mix do \
       local.rebar --force, \
       local.hex --force, \
       deps.clean --all, \
-      deps.get
+      deps.get, \
+      compile
 
 #HTTP
 EXPOSE 4002
