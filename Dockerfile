@@ -3,8 +3,10 @@ FROM elixir:1.5.2
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG ENV=prod
+ARG PORT=4002
 
 ENV MIX_ENV=$ENV REPLACE_OS_VARS=true
+ENV PORT=$PORT
 
 COPY . /app/
 WORKDIR /app
@@ -14,6 +16,7 @@ RUN rm -rf _build \
 
 # Install hex & rebar
 RUN mix do \
+      local.rebar --force, \
       local.hex --force, \
       deps.clean --all, \
       deps.get
