@@ -7,6 +7,8 @@ It doesn't store anything in a database, so the data is lost as soon the server 
 
 Requestbx is intended for testing purposes only, for example if you want to test webhooks.
 
+The server runs on port `4002`, also included is a docker container.
+
 ## Start
 To start your Phoenix server:
 
