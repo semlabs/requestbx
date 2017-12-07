@@ -11,23 +11,8 @@ defmodule RequestbxWeb.StoreController do
   end
 
   def get(conn, _params) do
-    retry(fn -> 
-      :ets.lookup(:request_store, conn.request_path) 
-    end, 0)
+    :ets.lookup(:request_store, conn.request_path) 
     |> remove_key(conn)
-  end
-
-  defp retry(fun, 100) do
-    []
-  end
-
-  defp retry(fun, times) do
-   case fun.() do
-     [] -> 
-       Process.sleep(10)
-       retry(fun, times + 1)
-     list -> list 
-   end 
   end
 
   defp remove_key([], conn) do
@@ -41,5 +26,15 @@ defmodule RequestbxWeb.StoreController do
         value 
       end)
     conn |> json(response)
+  end
+
+  def destroy(%{request_path: "/"} = conn, _params) do
+    :ets.delete_all_objects(:request_store)
+    conn |> send_resp(204, "") 
+  end
+
+  def destroy(conn, _params) do
+    :ets.delete(:request_store, conn.request_path) 
+    conn |> send_resp(204, "") 
   end
 end

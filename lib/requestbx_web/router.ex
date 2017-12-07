@@ -10,5 +10,6 @@ defmodule RequestbxWeb.Router do
 
     get "/*path", StoreController, :get
     post "/*path", StoreController, :store
+    delete "/*path", StoreController, :destroy
   end
 end
