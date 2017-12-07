@@ -11,8 +11,23 @@ defmodule RequestbxWeb.StoreController do
   end
 
   def get(conn, _params) do
-    :ets.lookup(:request_store, conn.request_path) 
+    retry(fn -> 
+      :ets.lookup(:request_store, conn.request_path) 
+    end)
     |> remove_key(conn)
+  end
+
+  defp retry(fun, 1000) do
+    []
+  end
+
+  defp retry(fun, times \\ 0) do
+   case fun.() do
+     [] -> 
+       Process.sleep(10)
+       retry(fun, times + 1)
+     list -> list 
+   end 
   end
 
   defp remove_key([], conn) do
