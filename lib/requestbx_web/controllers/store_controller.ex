@@ -17,11 +17,13 @@ defmodule RequestbxWeb.StoreController do
     |> remove_key(conn)
   end
 
-  defp retry(fun, 1000) do
+  defp retry(fun, times \\ 0)
+
+  defp retry(_fun, 100) do
     []
   end
 
-  defp retry(fun, times \\ 0) do
+  defp retry(fun, times) do
    case fun.() do
      [] -> 
        Process.sleep(10)
