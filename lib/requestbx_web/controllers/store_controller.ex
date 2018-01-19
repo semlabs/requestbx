@@ -10,26 +10,31 @@ defmodule RequestbxWeb.StoreController do
     |> send_resp(200, "")
   end
 
-  def get(conn, _params) do
+  def get(conn, params) do
+    expected_item_count = 
+      (params["expected_items"] || "1")
+      |> String.to_integer() 
+
     retry(fn -> 
       :ets.lookup(:request_store, conn.request_path) 
-    end)
+    end, expected_item_count)
     |> remove_key(conn)
   end
 
-  defp retry(fun, times \\ 0)
+  defp retry(fun, item_count, times \\ 0)
 
-  defp retry(_fun, 100) do
-    []
+  defp retry(fun, _, 100) do
+    fun.()
   end
 
-  defp retry(fun, times) do
-   case fun.() do
-     [] -> 
-       Process.sleep(10)
-       retry(fun, times + 1)
-     list -> list 
-   end 
+  defp retry(fun, item_count, times) do
+    list = fun.()
+    case length(list) do
+      len when len >= item_count -> list
+      len ->
+        Process.sleep(10)
+        retry(fun, item_count, times + 1)
+    end
   end
 
   defp remove_key([], conn) do
