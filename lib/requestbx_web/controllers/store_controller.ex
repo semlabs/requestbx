@@ -3,7 +3,15 @@ defmodule RequestbxWeb.StoreController do
 
   def store(conn, params) do
     params = Map.delete(params, "path")
-    :ets.insert(:request_store, {conn.request_path, params})
+    stored = 
+      case :ets.lookup(:request_store, conn.request_path) do
+        [] -> []
+        [{_, curr}] -> 
+          :ets.delete(:request_store, conn.request_path) 
+          curr
+      end
+
+    :ets.insert(:request_store, {conn.request_path, stored ++ [params]})
 
     conn
     |> put_resp_content_type("text/json")
@@ -31,7 +39,7 @@ defmodule RequestbxWeb.StoreController do
     list = fun.()
     case length(list) do
       len when len >= item_count -> list
-      len ->
+      _len ->
         Process.sleep(10)
         retry(fun, item_count, times + 1)
     end
@@ -41,12 +49,7 @@ defmodule RequestbxWeb.StoreController do
     conn |> send_resp(200, "") 
   end
 
-  defp remove_key(list, conn) do
-    response = 
-      list
-      |> Enum.map(fn {_, value} -> 
-        value 
-      end)
+  defp remove_key([{_, response}], conn) do
     conn |> json(response)
   end
 
