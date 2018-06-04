@@ -39,8 +39,8 @@ defmodule RequestbxWeb.StoreController do
 
   defp retry(fun, item_count, times) do
     list = fun.()
-    case length(list) do
-      len when len >= item_count -> list
+    case list do
+      [{_, items}] when length(items) >= item_count -> list
       _len ->
         Process.sleep(10)
         retry(fun, item_count, times - 1)
