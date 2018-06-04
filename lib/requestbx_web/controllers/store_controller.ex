@@ -23,15 +23,17 @@ defmodule RequestbxWeb.StoreController do
       (params["expected_items"] || "1")
       |> String.to_integer() 
 
+    waiting_time = 
+      (params["max_waiting"] || "100")
+      |> String.to_integer() 
+
     retry(fn -> 
       :ets.lookup(:request_store, conn.request_path) 
-    end, expected_item_count)
+    end, expected_item_count, waiting_time)
     |> remove_key(conn)
   end
 
-  defp retry(fun, item_count, times \\ 0)
-
-  defp retry(fun, _, 100) do
+  defp retry(fun, _, 0) do
     fun.()
   end
 
@@ -41,7 +43,7 @@ defmodule RequestbxWeb.StoreController do
       len when len >= item_count -> list
       _len ->
         Process.sleep(10)
-        retry(fun, item_count, times + 1)
+        retry(fun, item_count, times - 1)
     end
   end
 
